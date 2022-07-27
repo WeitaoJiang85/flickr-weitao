@@ -5,11 +5,19 @@ import ImageListItemBar from "@mui/material/ImageListItemBar";
 import ListSubheader from "@mui/material/ListSubheader";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
+import { Link } from "react-router-dom";
 
-const SearchResults = ({ result, query }) => {
+const SearchResults = ({ result, query, handleSeleced }) => {
   return (
-    <ImageList sx={{ width: 800, height: 1000 }}>
-      <ImageListItem key="Subheader" cols={3}>
+    <ImageList
+      sx={{
+        width: "60vw",
+        height: "80vh",
+        margin: "10px auto 0",
+        justifyContent: "center",
+      }}
+    >
+      <ImageListItem key="Subheader" cols={2}>
         <ListSubheader component="div">
           Search results here for {query}
         </ListSubheader>
@@ -18,8 +26,8 @@ const SearchResults = ({ result, query }) => {
       {result.map((item) => (
         <ImageListItem key={item.id}>
           <img
-            src={`${`https://live.staticflickr.com/${item.server_id}/${item.id}_${item.secret}_z.jpg`}?w=400&fit=crop&auto=format`}
-            srcSet={`${`https://live.staticflickr.com/${item.server_id}/${item.id}_${item.secret}_z.jpg`}?w=400&fit=crop&auto=format&dpr=2 2x`}
+            src={`${`https://live.staticflickr.com/${item.server_id}/${item.id}_${item.secret}_z.jpg`}?w=200&fit=crop&auto=format`}
+            srcSet={`${`https://live.staticflickr.com/${item.server_id}/${item.id}_${item.secret}_z.jpg`}?w=200&fit=crop&auto=format&dpr=2 2x`}
             alt={item.title}
             loading="lazy"
           />
@@ -27,12 +35,17 @@ const SearchResults = ({ result, query }) => {
             title={item.title}
             subtitle={item.owner}
             actionIcon={
-              <IconButton
-                sx={{ color: "rgba(255, 255, 255, 0.54)" }}
-                aria-label={`info about ${item.title}`}
+              <Link
+                to={`/search/${query}/${item.id}`}
+                onClick={() => handleSeleced(item.id)}
               >
-                <InfoIcon />
-              </IconButton>
+                <IconButton
+                  sx={{ color: "rgba(255, 255, 255, 0.54)" }}
+                  aria-label={`info about ${item.title}`}
+                >
+                  <InfoIcon />
+                </IconButton>
+              </Link>
             }
           />
         </ImageListItem>

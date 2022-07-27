@@ -4,25 +4,30 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
+import PaginationButtons from "../PaginationButtons";
 import SearchResults from "../SearchResults";
+import PhotoDetail from "../PhotoDetail";
 
-//const FLICKR_API_KEY = process.env.REACT_APP_FLICKR_API_KEY;
+const FLICKR_API_KEY = process.env.REACT_APP_FLICKR_API_KEY;
 
 const SearchPage = () => {
   let navigate = useNavigate();
   const [result, setResult] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [totalPages, setTotalPages] = useState(0);
   const [query, setQuery] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate(`/search/${query}`);
-    console.log(query);
   };
 
+  const handleSeleced = (id) => {
+    setSelectedPhoto(result.find((photo) => photo.id === id));
+  };
   const handleFetch = () => {
-    const searchURL = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=59b72565c8aca4baadc7b72c64d2cce9&tags=${query}l&per_page=12&page=${page}&format=json&nojsoncallback=1`;
+    const searchURL = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&tags=${query}l&per_page=12&page=${page}&format=json&nojsoncallback=1`;
     fetch(searchURL)
       .then((response) => {
         return response.json();
@@ -38,7 +43,7 @@ const SearchPage = () => {
             server_id: item.server,
           }));
           console.log("Search result:", searchResult);
-          setResult([...result, ...searchResult]);
+          setResult(searchResult);
           console.log("Result:", result);
         }
         setTotalPages(jsonData.photos.pages);
@@ -47,14 +52,6 @@ const SearchPage = () => {
       .catch((error) => {
         console.log(error);
       });
-  };
-
-  const loadMore = () => {
-    if (page < totalPages) {
-      setPage(page + 1);
-    } else {
-      alert("This is  the last page");
-    }
   };
 
   useEffect(handleFetch, [page]);
@@ -76,19 +73,35 @@ const SearchPage = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <Button type="submit" variant="contained" onClick={handleFetch}>
+          <Button
+            disabled={!query}
+            type="submit"
+            variant="contained"
+            onClick={handleFetch}
+          >
             Search
           </Button>
         </Stack>
       </form>
-
-      <SearchResults result={result} query={query} />
-
-      {result.length > 1 ? (
-        <button className="loadmore" onClick={loadMore}>
-          Load More
-        </button>
-      ) : null}
+      <SearchResults
+        result={result}
+        query={query}
+        handleSeleced={handleSeleced}
+      />
+      <br />
+      <PaginationButtons totalPages={totalPages} setPage={setPage} />
+      <section>
+        {selectedPhoto ? (
+          <PhotoDetail
+            key={selectedPhoto.id}
+            id={selectedPhoto.id}
+            title={selectedPhoto.title}
+            owner={selectedPhoto.owner}
+            secret={selectedPhoto.secret}
+            server_id={selectedPhoto.server_id}
+          />
+        ) : null}
+      </section>
     </Container>
   );
 };
