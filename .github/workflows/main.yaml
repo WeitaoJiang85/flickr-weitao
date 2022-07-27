@@ -11,13 +11,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Configure Aws Creds
+      - name: Configure AWS Creds
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
+      # Install depepndencies and run unit tests
       - name: Install dependencies and run tests
         run: npm install && npm run test
 
