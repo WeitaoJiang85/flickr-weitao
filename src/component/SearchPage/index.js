@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
+import ImageList from "@mui/material/ImageList";
+import ImageListItem from "@mui/material/ImageListItem";
+import ListSubheader from "@mui/material/ListSubheader";
 import PaginationButtons from "../PaginationButtons";
 import SearchResults from "../SearchResults";
 import PhotoDetail from "../PhotoDetail";
@@ -11,26 +13,20 @@ import PhotoDetail from "../PhotoDetail";
 const FLICKR_API_KEY = process.env.REACT_APP_FLICKR_API_KEY;
 
 const SearchPage = () => {
+  const params = useParams();
   let navigate = useNavigate();
   const [result, setResult] = useState([]);
   const [page, setPage] = useState(1);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [query, setQuery] = useState("");
+  const [isloading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    navigate(`/search/${query}`);
-  };
-
-  const handleSeleced = (id) => {
-    setSelectedPhoto(result.find((photo) => photo.id === id));
-  };
-  const handleFetch = () => {
-    const searchURL = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&tags=${query}l&per_page=12&page=${page}&format=json&nojsoncallback=1`;
-    fetch(searchURL)
-      .then((response) => {
-        return response.json();
+  useEffect(() => {
+    fetch(
+      `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&text=${params.queryText}l&per_page=8&page=${page}&format=json&nojsoncallback=1`
+    )
+      .then((res) => {
+        return res.json();
       })
       .then((jsonData) => {
         if (jsonData.stat === "ok") {
@@ -42,22 +38,26 @@ const SearchPage = () => {
             secret: item.secret,
             server_id: item.server,
           }));
-          console.log("Search result:", searchResult);
           setResult(searchResult);
+          setIsLoading(false);
           console.log("Result:", result);
         }
         setTotalPages(jsonData.photos.pages);
       })
-
       .catch((error) => {
         console.log(error);
       });
+  }, [params.queryText, page]);
+
+  useEffect(() => setPage(1), [params.queryText]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/search/${query}`);
   };
 
-  useEffect(handleFetch, [page]);
-
   return (
-    <Container maxWidth="sm">
+    <>
       <h1>Flickr Search</h1>
       <form onSubmit={handleSubmit}>
         <Stack
@@ -77,32 +77,51 @@ const SearchPage = () => {
             disabled={!query}
             type="submit"
             variant="contained"
-            onClick={handleFetch}
+            size="large"
           >
             Search
           </Button>
         </Stack>
       </form>
-      <SearchResults
-        result={result}
-        query={query}
-        handleSeleced={handleSeleced}
-      />
+      {isloading ? (
+        <p>Loading...</p>
+      ) : (
+        <ImageList
+          sx={{
+            width: "60vw",
+            height: "80vh",
+            margin: "10px auto 0",
+            justifyContent: "center",
+          }}
+        >
+          <ImageListItem
+            key="Subheader"
+            cols={2}
+            sx={{ width: "100%", height: "80vh", margin: "10px auto 0" }}
+          >
+            <ListSubheader component="div">
+              Search results here for {params.queryText}
+            </ListSubheader>
+          </ImageListItem>
+          {result.map((item) => (
+            <SearchResults
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              owner={item.owner}
+              secret={item.secret}
+              server_id={item.server_id}
+            />
+          ))}
+        </ImageList>
+      )}
       <br />
-      <PaginationButtons totalPages={totalPages} setPage={setPage} />
-      <section>
-        {selectedPhoto ? (
-          <PhotoDetail
-            key={selectedPhoto.id}
-            id={selectedPhoto.id}
-            title={selectedPhoto.title}
-            owner={selectedPhoto.owner}
-            secret={selectedPhoto.secret}
-            server_id={selectedPhoto.server_id}
-          />
-        ) : null}
-      </section>
-    </Container>
+      <PaginationButtons
+        totalPages={totalPages}
+        setPage={setPage}
+        currentPage={page}
+      />
+    </>
   );
 };
 
