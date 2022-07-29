@@ -39,7 +39,6 @@ const SearchPage = () => {
           }));
           setResult(searchResult);
           setIsLoading(false);
-          console.log("Result:", result);
         }
         setTotalPages(jsonData.photos.pages);
       })
