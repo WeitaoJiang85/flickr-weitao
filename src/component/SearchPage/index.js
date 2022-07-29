@@ -8,9 +8,8 @@ import ImageListItem from "@mui/material/ImageListItem";
 import ListSubheader from "@mui/material/ListSubheader";
 import PaginationButtons from "../PaginationButtons";
 import SearchResults from "../SearchResults";
-import PhotoDetail from "../PhotoDetail";
 
-const FLICKR_API_KEY = process.env.REACT_APP_FLICKR_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 const SearchPage = () => {
   const params = useParams();
@@ -23,7 +22,7 @@ const SearchPage = () => {
 
   useEffect(() => {
     fetch(
-      `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${FLICKR_API_KEY}&text=${params.queryText}l&per_page=8&page=${page}&format=json&nojsoncallback=1`
+      `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${API_KEY}&text=${params.queryText}l&per_page=8&page=${page}&format=json&nojsoncallback=1`
     )
       .then((res) => {
         return res.json();

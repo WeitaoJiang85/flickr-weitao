@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-const FLICKR_API_KEY = process.env.REACT_APP_FLICKR_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 const PhotoDetail = () => {
   const params = useParams();
@@ -11,7 +11,7 @@ const PhotoDetail = () => {
   useEffect(() => {
     setIsLoading(true);
     fetch(
-      `https://www.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=${FLICKR_API_KEY}&photo_id=${params.photoId}&format=json&nojsoncallback=1`
+      `https://www.flickr.com/services/rest/?method=flickr.photos.getInfo&api_key=${API_KEY}&photo_id=${params.photoId}&format=json&nojsoncallback=1`
     )
       .then((res) => res.json())
       .then((detail) => {
